@@ -1,21 +1,71 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
+
 import * as cdk from 'aws-cdk-lib';
-import { TmCdkStack } from '../lib/tm-cdk-stack';
+import { TmVpcStack, TmVpcStackProps } from '../lib/tm-vpc-stack';
+import { TmEcsStack, TmEcsStackProps } from '../lib/tm-ecs-stack';
+import { TmCloudfrontStack, TmCloudfrontStackProps } from '../lib/tm-cloudfront-stack';
+import { TmPipelineStack, TmPipelineStackProps } from '../lib/tm-pipeline-stack';
 
 const app = new cdk.App();
-new TmCdkStack(app, 'TmCdkStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const caCentral1Env = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: 'ca-central-1',
+}
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+const usEast1Env = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: 'us-east-1',
+}
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+const vpcStackProps: TmVpcStackProps = {
+  crossRegionReferences: true,
+  env: caCentral1Env,
+  rangeCidr: '10.0.0.0/16',
+  vpcName: 'myVpc',
+  //enableEndpoints:['s3', 'dynamodb'],
+  //maxAzs: 2,
+}
+
+const vpcStack = new TmVpcStack(app, 'CustomVpcStack', vpcStackProps);
+
+const ecsStackProps: TmEcsStackProps = {
+  crossRegionReferences: true,
+  env: caCentral1Env,
+  vpc: vpcStack.vpc,
+  allowPublicInternetAccess: true,
+  listenToHttp: true,
+  listenToHttps: false,
+  memoryLimitMiB: 2048,
+  cpu: 1024,
+  desiredCount: 1,
+  containerPort: 80,
+  customHeaderValue: 'sdsdsdsdsd',
+  domainName: 'www.tm-efosso.quebec.ca',
+  hostedZoneId: 'Z09593181OB8J3H92ORGI',
+}
+
+const ecsStack = new TmEcsStack(app, 'CustomEcsStack', ecsStackProps);
+
+const cloudFrontStackProps: TmCloudfrontStackProps = {
+  crossRegionReferences: true,
+  originDnsName: ecsStack.loadbalancer.loadBalancerDnsName,
+  domainName: ecsStackProps.domainName,
+  hostedZoneId: ecsStackProps.hostedZoneId,
+  env: usEast1Env,
+  // additionalCookies: [],
+  // retainLogBuckets: false,
+  // webAclId: '',
+  // errorCachingMinTtl: 300,
+  applicationLoadbalancer: ecsStack.loadbalancer,
+  customHeaderValue: ecsStackProps.customHeaderValue
+}
+
+const cloudfrontStack = new TmCloudfrontStack(app, 'CustomCloudfrontStack', cloudFrontStackProps);
+
+const  pipelineStackProps: TmPipelineStackProps = {
+  env: caCentral1Env,
+  cluster: ecsStack.cluster,
+  service: ecsStack.fargateService,
+}
+const myPipelineStack = new TmPipelineStack(app, 'pipeline', pipelineStackProps);

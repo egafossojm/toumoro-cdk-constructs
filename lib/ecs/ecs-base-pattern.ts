@@ -58,10 +58,6 @@ export interface TmApplicationLoadBalancedFargateServiceProps extends ecsPattern
 */
   readonly maxTaskCount?: number;
 
-  /**
-* The Custum Header value for the loadbalancer and cloudfront.
-*/
-readonly customHeaderValue?: string;
 
 }
 
@@ -86,7 +82,8 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
         subnetType: ec2.SubnetType.PUBLIC
       },
       taskImageOptions: {
-        image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample'),
+        image: ecs.ContainerImage.fromAsset('lib/ecs/containerImage'),
+        //image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample'),
         containerPort: props.containerPort, // Optional: Specify the container port
         enableLogging: true,
         containerName: 'web',
@@ -110,7 +107,7 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
     this.listener.addTargetGroups('HeaderConditionForward', {
       priority: 1,
       conditions: [
-        elbv2.ListenerCondition.httpHeader('X-Custom-Header', [props.customHeaderValue || 'MyHeaderValue'])
+        elbv2.ListenerCondition.httpHeader('X-Custom-Header', ['sdsdsdsdsd'])
       ],
       targetGroups: [this.targetGroup],
     });

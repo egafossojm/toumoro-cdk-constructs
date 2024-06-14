@@ -40,7 +40,6 @@ const ecsStackProps: TmEcsStackProps = {
   cpu: 1024,
   desiredCount: 1,
   containerPort: 80,
-  customHeaderValue: 'sdsdsdsdsd',
   domainName: 'www.tm-efosso.quebec.ca',
   hostedZoneId: 'Z09593181OB8J3H92ORGI',
 }
@@ -58,7 +57,6 @@ const cloudFrontStackProps: TmCloudfrontStackProps = {
   // webAclId: '',
   // errorCachingMinTtl: 300,
   applicationLoadbalancer: ecsStack.loadbalancer,
-  customHeaderValue: ecsStackProps.customHeaderValue
 }
 
 const cloudfrontStack = new TmCloudfrontStack(app, 'CustomCloudfrontStack', cloudFrontStackProps);

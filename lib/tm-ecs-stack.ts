@@ -18,7 +18,6 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly cpu?: number;
   readonly desiredCount?: number;
   readonly containerPort?: number;
-  readonly customHeaderValue?: string;
   readonly domainName: string;
   readonly hostedZoneId: string;
 }
@@ -58,7 +57,6 @@ export class TmEcsStack extends cdk.Stack {
         domainName: props.domainName,
         validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', props.hostedZoneId)),
       }),
-      customHeaderValue: props.customHeaderValue,
     }
 
     /** Service Pattern */

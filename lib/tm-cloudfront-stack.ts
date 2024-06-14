@@ -28,7 +28,6 @@ export interface TmCloudfrontStackProps extends cdk.StackProps {
     readonly applicationLoadbalancer: ILoadBalancerV2;
     readonly loadBalancerOriginProtocol?: OriginProtocolPolicy;
     readonly viewerProtocolPolicy?: ViewerProtocolPolicy;
-    readonly customHeaderValue?: string;
 
 }
 
@@ -72,7 +71,7 @@ export class TmCloudfrontStack extends cdk.Stack {
         this.loadBalancerOrigin = new LoadBalancerV2Origin(props.applicationLoadbalancer, {
             protocolPolicy: props.loadBalancerOriginProtocol || OriginProtocolPolicy.HTTPS_ONLY,
             customHeaders: {
-                'X-Custom-Header': props.customHeaderValue || 'MyHeaderValue',
+                'X-Custom-Header': 'sdsdsdsdsd',
             }
         });
 

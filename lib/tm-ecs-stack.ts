@@ -20,6 +20,8 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly containerPort?: number;
   readonly domainName: string;
   readonly hostedZoneId: string;
+  readonly minTaskCount?: number;
+  readonly maxTaskCount?: number;
 }
 
 export class TmEcsStack extends cdk.Stack {
@@ -52,6 +54,8 @@ export class TmEcsStack extends cdk.Stack {
       memoryLimitMiB: props.memoryLimitMiB,
       cpu: props.cpu,
       desiredCount: props.desiredCount,
+      minTaskCount: props.minTaskCount,
+      maxTaskCount: props.maxTaskCount,
       containerPort: props.containerPort,
       certificate: new acm.Certificate(this, 'Certificate', {
         domainName: props.domainName,

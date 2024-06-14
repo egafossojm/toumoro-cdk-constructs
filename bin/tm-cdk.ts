@@ -30,16 +30,18 @@ const vpcStackProps: TmVpcStackProps = {
 const vpcStack = new TmVpcStack(app, 'CustomVpcStack', vpcStackProps);
 
 const ecsStackProps: TmEcsStackProps = {
-  crossRegionReferences: true,
+  // crossRegionReferences: true,
+  // allowPublicInternetAccess: true,
+  // listenToHttp: true,
+  // listenToHttps: false,
+  // memoryLimitMiB: 512,
+  // cpu: 256,
+  // desiredCount: 1,
+  // minTaskCount: 1,
+  // maxTaskCount: 3,
+  // containerPort: 80,
   env: caCentral1Env,
   vpc: vpcStack.vpc,
-  allowPublicInternetAccess: true,
-  listenToHttp: true,
-  listenToHttps: false,
-  memoryLimitMiB: 2048,
-  cpu: 1024,
-  desiredCount: 1,
-  containerPort: 80,
   domainName: 'www.tm-efosso.quebec.ca',
   hostedZoneId: 'Z09593181OB8J3H92ORGI',
 }

@@ -87,9 +87,6 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
         containerPort: props.containerPort, // Optional: Specify the container port
         enableLogging: true,
         containerName: 'web',
-        
-        
-
         // environment: { // Optional: Add environment variables
         //   ENV_VAR_NAME: 'value'
         // },
@@ -123,7 +120,7 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
     // Configure auto-scaling
     const scaling = this.service.autoScaleTaskCount({
       minCapacity: mergedProps.minTaskCount,
-      maxCapacity: mergedProps.maxTaskCount ?? 3,
+      maxCapacity: mergedProps.maxTaskCount || 3,
     });
 
     // Scale based on CPU utilization

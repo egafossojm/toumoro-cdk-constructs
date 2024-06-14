@@ -22,6 +22,7 @@ export class TmVpcStack extends cdk.Stack {
     super(scope, id, props);
 
     const vpcProps: TmVpcStackProps = {
+      crossRegionReferences: true,
       rangeCidr: props.rangeCidr,
       vpcName: props.vpcName,
       enableEndpoints: props.enableEndpoints,

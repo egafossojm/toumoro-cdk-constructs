@@ -1,4 +1,4 @@
-import { CfnOutput, Duration } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
@@ -58,6 +58,11 @@ export interface TmApplicationLoadBalancedFargateServiceProps extends ecsPattern
 */
   readonly maxTaskCount?: number;
 
+    /**
+* Custom http header value.
+*/
+readonly customHttpHeaderValue?: string;
+
 
 }
 
@@ -83,7 +88,6 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
       },
       taskImageOptions: {
         image: ecs.ContainerImage.fromAsset('lib/ecs/containerImage'),
-        //image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample'),
         containerPort: props.containerPort, // Optional: Specify the container port
         enableLogging: true,
         containerName: 'web',
@@ -104,7 +108,7 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
     this.listener.addTargetGroups('HeaderConditionForward', {
       priority: 1,
       conditions: [
-        elbv2.ListenerCondition.httpHeader('X-Custom-Header', ['sdsdsdsdsd'])
+        elbv2.ListenerCondition.httpHeader('X-Custom-Header', [mergedProps.customHttpHeaderValue || ''])
       ],
       targetGroups: [this.targetGroup],
     });
@@ -126,15 +130,15 @@ export class TmApplicationLoadBalancedFargateService extends ecsPatterns.Applica
     // Scale based on CPU utilization
     scaling.scaleOnCpuUtilization('CpuScaling', {
       targetUtilizationPercent: 50,
-      scaleInCooldown: Duration.seconds(60),
-      scaleOutCooldown: Duration.seconds(60),
+      scaleInCooldown: cdk.Duration.seconds(60),
+      scaleOutCooldown: cdk.Duration.seconds(60),
     });
 
     // Scale based on Memory utilization
     scaling.scaleOnMemoryUtilization('MemoryScaling', {
       targetUtilizationPercent: 50,
-      scaleInCooldown: Duration.seconds(60),
-      scaleOutCooldown: Duration.seconds(60),
+      scaleInCooldown: cdk.Duration.seconds(60),
+      scaleOutCooldown: cdk.Duration.seconds(60),
     });
 
  

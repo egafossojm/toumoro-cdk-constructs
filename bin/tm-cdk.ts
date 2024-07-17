@@ -4,7 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { TmVpcStack, TmVpcStackProps } from '../lib/tm-vpc-stack';
 import { TmEcsStack, TmEcsStackProps } from '../lib/tm-ecs-stack';
 import { TmCloudfrontStack, TmCloudfrontStackProps } from '../lib/tm-cloudfront-stack';
-import { TmPipelineStack, TmPipelineStackProps } from '../lib/tm-pipeline-stack';
+import { CommonStack } from '../lib/tm-common-stack';
 
 const app = new cdk.App();
 
@@ -22,6 +22,11 @@ const usEast2Env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
   region: 'us-east-2',
 }
+
+const commonStack = new CommonStack(app, 'CommonStack', {
+  crossRegionReferences: true,
+  env: caCentral1Env,
+});
 
 const vpcStackProps1: TmVpcStackProps = {
   crossRegionReferences: true,
@@ -45,7 +50,7 @@ const vpcStack1 = new TmVpcStack(app, 'CustomVpcStack1', vpcStackProps1);
 const vpcStack2 = new TmVpcStack(app, 'CustomVpcStack2', vpcStackProps2);
 
 const ecsStackProps1: TmEcsStackProps = {
-  // crossRegionReferences: true,
+  crossRegionReferences: true,
   // allowPublicInternetAccess: true,
   // listenToHttp: true,
   // listenToHttps: false,
@@ -57,12 +62,13 @@ const ecsStackProps1: TmEcsStackProps = {
   // containerPort: 80,
   env: caCentral1Env,
   vpc: vpcStack1.vpc,
-  domainName: 'www.tm-efosso.quebec.ca',
-  hostedZoneId: 'Z09593181OB8J3H92ORGI',
+  customHttpHeaderValue: commonStack.customHttpHeaderValue.valueAsString,
+  domainName: commonStack.domainName.valueAsString,
+  hostedZoneId: commonStack.hostedZoneId.valueAsString,
 }
 
 const ecsStackProps2: TmEcsStackProps = {
-  // crossRegionReferences: true,
+  crossRegionReferences: true,
   // allowPublicInternetAccess: true,
   // listenToHttp: true,
   // listenToHttps: false,
@@ -74,32 +80,27 @@ const ecsStackProps2: TmEcsStackProps = {
   // containerPort: 80,
   env: usEast2Env,
   vpc: vpcStack2.vpc,
-  domainName: 'www.tm-efosso.quebec.ca',
-  hostedZoneId: 'Z09593181OB8J3H92ORGI',
+  customHttpHeaderValue: commonStack.customHttpHeaderValue.valueAsString,
+  domainName: commonStack.domainName.valueAsString,
+  hostedZoneId: commonStack.hostedZoneId.valueAsString,
 }
+
 
 const ecsStack1 = new TmEcsStack(app, 'CustomEcsStack1', ecsStackProps1);
 const ecsStack2 = new TmEcsStack(app, 'CustomEcsStack2', ecsStackProps2);
 
 const cloudFrontStackProps: TmCloudfrontStackProps = {
-  crossRegionReferences: true,
-  //originDnsName: ecsStack.loadbalancer.loadBalancerDnsName,
-  domainName: ecsStackProps1.domainName,
-  hostedZoneId: ecsStackProps1.hostedZoneId,
-  env: usEast1Env,
   // additionalCookies: [],
   // retainLogBuckets: false,
   // webAclId: '',
   // errorCachingMinTtl: 300,
+  env: usEast1Env,
+  crossRegionReferences: true,
+  customHttpHeaderValue: commonStack.customHttpHeaderValue.valueAsString,
+  domainName: commonStack.domainName.valueAsString,
+  hostedZoneId: commonStack.hostedZoneId.valueAsString,
   applicationLoadbalancer1: ecsStack1.loadbalancer,
   applicationLoadbalancer2: ecsStack2.loadbalancer,
 }
 
 const cloudfrontStack = new TmCloudfrontStack(app, 'CustomCloudfrontStack', cloudFrontStackProps);
-
-// const  pipelineStackProps: TmPipelineStackProps = {
-//   env: caCentral1Env,
-//   cluster: ecsStack.cluster,
-//   service: ecsStack.fargateService,
-// }
-// const myPipelineStack = new TmPipelineStack(app, 'pipeline', pipelineStackProps);
